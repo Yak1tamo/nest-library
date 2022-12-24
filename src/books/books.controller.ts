@@ -1,28 +1,37 @@
-import { Controller, Post, Get, Put, Delete, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Delete,
+  Body,
+  Param,
+} from '@nestjs/common';
 import { BooksService } from './books.service';
-import { Book } from './interfaces/book.interface';
+import { IBook } from './interfaces/book.interface';
+import { BookDocument } from './schemas/book.schema';
 
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
   @Post()
-  createBook(@Body() newBook: Book): void {
-    return this.booksService.createBook(newBook);
+  createBook(@Body() data: IBook): Promise<BookDocument> {
+    return this.booksService.createBook(data);
   }
 
   @Get()
-  getBooks(): Book[] {
+  getBooks(): Promise<BookDocument[]> {
     return this.booksService.getBooks();
   }
 
-  @Put()
-  updateBooks(@Body() newBook: Book, idx = 0): Book {
-    return this.booksService.updateBooks(newBook, idx);
+  @Put(':id')
+  updateBooks(@Body() data: IBook, @Param() { id }): Promise<BookDocument> {
+    return this.booksService.updateBooks(data, id);
   }
 
-  @Delete()
-  deleteBook(idx = 0): void {
-    return this.booksService.deleteBook(idx);
+  @Delete(':id')
+  deleteBook(@Param() { id }): Promise<BookDocument> {
+    return this.booksService.deleteBook(id);
   }
 }
