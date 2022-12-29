@@ -6,11 +6,17 @@ import {
   Delete,
   Body,
   Param,
+  UseInterceptors,
+  UsePipes,
 } from '@nestjs/common';
 import { BooksService } from './books.service';
 import { IBook } from './interfaces/book.interface';
 import { BookDocument } from './schemas/book.schema';
+import { ResponseInterceptor } from '../app.response.interceptor';
+import { JoiValidationPipe } from './validation/joi.validation.pipe';
+import { idSchema } from './validation/schemas/idParam.schema';
 
+@UseInterceptors(ResponseInterceptor)
 @Controller('books')
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
@@ -25,13 +31,19 @@ export class BooksController {
     return this.booksService.getBooks();
   }
 
+  // @UsePipes(new JoiValidationPipe(idSchema))
   @Put(':id')
-  updateBooks(@Body() data: IBook, @Param() { id }): Promise<BookDocument> {
+  updateBooks(
+    @Body() data: IBook,
+    @Param(new JoiValidationPipe(idSchema)) id: string,
+  ): Promise<BookDocument> {
     return this.booksService.updateBooks(data, id);
   }
 
   @Delete(':id')
-  deleteBook(@Param() { id }): Promise<BookDocument> {
+  deleteBook(
+    @Param(new JoiValidationPipe(idSchema)) id: string,
+  ): Promise<BookDocument> {
     return this.booksService.deleteBook(id);
   }
 }
