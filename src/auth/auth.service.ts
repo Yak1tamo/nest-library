@@ -21,7 +21,7 @@ export class AuthService {
     return null;
   }
 
-  async addUser(user): Promise<UserDocument> | null {
+  async createUser(user) {
     const available = await this.UserModel.findOne({ email: user.email });
     if (available) {
       return null;
@@ -34,22 +34,31 @@ export class AuthService {
       lastName: user.lastName,
     };
     const newUser = new this.UserModel(data);
-    return await newUser.save();
+    await newUser.save();
+    return await this.login(newUser);
+  }
+
+  async loginUser(user) {
+    const available = await this.UserModel.findOne({ email: user.email });
+    if (!available) {
+      return null;
+    }
+    const flag = bcrypt.compareSync(user.password, available.password);
+    if (!flag) {
+      return null;
+    }
+    return await this.login(available);
   }
 
   async login(user) {
-    // const flag = bcrypt.compareSync(password, user.passwordHash)
     const payload = {
       id: user.id,
       email: user.email,
       firstName: user.firstName,
     };
     return {
+      ...payload,
       accessToken: this.jwtService.sign(payload),
     };
   }
-
-  // createToken(payload: any) {
-  //   return this.jwtService.sign(payload);
-  // }
 }
