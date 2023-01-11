@@ -35,7 +35,7 @@ export class AuthService {
     };
     const newUser = new this.UserModel(data);
     await newUser.save();
-    return await this.login(newUser);
+    return await this.addToken(newUser);
   }
 
   async loginUser(user) {
@@ -47,10 +47,10 @@ export class AuthService {
     if (!flag) {
       return null;
     }
-    return await this.login(available);
+    return await this.addToken(available);
   }
 
-  async login(user) {
+  async addToken(user) {
     const payload = {
       id: user.id,
       email: user.email,
